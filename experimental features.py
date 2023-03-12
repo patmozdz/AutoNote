@@ -1,4 +1,7 @@
 # import deskew
+
+#TODO: update cudNN to 8.8 (currently 8700, as seen through print(torch.backends.cudnn.version()) virtual environment not inheriting PATH variables?
+#TODO: Upgrade to Python 3.11.1 when Whisper becomes available on it
 #
 # in run_pytess(file_name):
 # Experimental:
@@ -10,7 +13,3 @@
 #
 # Check if CUDA is available and working:
 # test_data = str(torch.cuda.is_available()) + " " + str(torch.version.cuda) + " " + str(torch.cuda.current_device()) + " " + str(torch.backends.cudnn.version()) #CUDA available
-
-# for supported_type in SUPPORTED_AUD:
-#     if file_name.endswith(supported_type):
-#         file_type = supported_type
