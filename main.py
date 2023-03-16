@@ -19,4 +19,9 @@ def convert_and_display(folder="files"):
                 raise Exception(f"Non file: {file_name} found in {folder}")
 
 
-convert_and_display()
+def main():
+    convert_and_display()
+
+
+if __name__ == "__main__":
+    main()
