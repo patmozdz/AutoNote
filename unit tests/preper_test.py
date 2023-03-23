@@ -1,12 +1,15 @@
 import pytest
 from preper import determine_type, run_whisper, run_pytess
-#TODO: Create an empty __init__.py file to directory "unit tets" so that the above can be imported.
-#TODO: Currently cannot be imported because not in same directory.
 
 
 def test_determine_type():
-    assert True
+    assert determine_type("test.txt") == ".txt"
+    assert determine_type("test.mp4") == ".mp4"
 
+    with pytest.raises(Exception, match=f"File: file w/o type type could not be determined"):
+        determine_type("file w/o type")
+    with pytest.raises(Exception, match=f"File:  type could not be determined"):
+        determine_type("")
 
 def test_run_whisper():
     assert True

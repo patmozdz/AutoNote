@@ -13,3 +13,6 @@
 #
 # Check if CUDA is available and working:
 # test_data = str(torch.cuda.is_available()) + " " + str(torch.version.cuda) + " " + str(torch.cuda.current_device()) + " " + str(torch.backends.cudnn.version()) #CUDA available
+
+#from old.threadsafecounter import ThreadSafeCounter
+#counter = Counter() if you want a thread safe counter, currently no need

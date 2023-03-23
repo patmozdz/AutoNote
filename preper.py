@@ -1,7 +1,6 @@
 from PIL import Image, ImageOps
 import pytesseract as pytess
 import whisper
-from os import path
 
 SUPPORTED_AUD = {".mp4", ".mp3", ".wav", ".m4a"}
 SUPPORTED_IMG = {".png", ".jpeg", ".tiff"}
@@ -21,7 +20,7 @@ def determine_type(file_name: str) -> str:
             if file_name[index] == ".":
 
                 return file_type
-            index += 1
+            index -= 1
         else:
             raise Exception(f"File: {file_name} type could not be determined")
 
