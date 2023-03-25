@@ -5,6 +5,8 @@ import threading
 import keyboard
 from collections import deque
 import time
+import os
+import datetime
 
 
 # Constants
@@ -45,12 +47,14 @@ def record_audio():
         print("Recording thread terminated.")
 
 
+# Converts seconds of audio to number of audio chunks
 def secs_to_num_chunks(secs: int) -> int:
     num_chunks = secs * RATE // CHUNK_SIZE
 
     return num_chunks
 
 
+# Converts number of audio chunks to seconds of audio
 def num_chunks_to_secs(num_chunks: int) -> int:
     secs = num_chunks * CHUNK_SIZE // RATE
 
@@ -62,6 +66,7 @@ def save_audio(file_number: int, duration: int):
     with buffer_lock:
         buffer_copy = tuple(buffer)
 
+    # Decides if full requested amount of seconds can be saved (if recording long enough), prints message if not
     buffer_total_chunks = len(buffer_copy)
     wanted_chunks = secs_to_num_chunks(duration)  # TODO: Verify that // is good for this, possibly a chunk getting cut off and instead should use / then round up?
     if wanted_chunks > buffer_total_chunks:
@@ -71,15 +76,20 @@ def save_audio(file_number: int, duration: int):
     else:
         chunks_to_process = wanted_chunks
 
-    with wave.open(f"output_{file_number}.wav", "wb") as audio_file:
+    # Get current time, and name the file as file number-current_datetime. So for eg: 0-12/1/2023
+    current_datetime = datetime.now()
+    file_name = f"{file_number}-{current_datetime}"
+    with wave.open(file_name, "wb") as audio_file:
+        # Audio setup stuff
         audio_file.setnchannels(CHANNELS)
         audio_file.setsampwidth(pyaudio.get_sample_size(FORMAT))
         audio_file.setframerate(RATE)
 
-        for chunk in buffer_copy[buffer_total_chunks - chunks_to_process:]:  # Traverse through last max_chunks of buffer_copy TODO: Same as above, make sure this isn't dropping a chunk
+        # Traverse through last max_chunks of buffer_copy TODO: Same as above, make sure this isn't dropping a chunk
+        for chunk in buffer_copy[buffer_total_chunks - chunks_to_process:]:
             audio_file.writeframes(chunk.tobytes())
 
-    print(f"Request for {duration} seconds saved under file with name output_{file_number}!")
+    print(f"Request for {duration} seconds saved under file with name {file_name}!")
 
 
 # Set up event to exit when exit requested
