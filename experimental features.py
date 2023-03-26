@@ -16,3 +16,22 @@
 
 #from old.threadsafecounter import ThreadSafeCounter
 #counter = Counter() if you want a thread safe counter, currently no need
+#
+# print(f"\t\t---------------------------\n"
+#       f"\t\tFile with name: {file_name}\n"
+#       f"\t\t---------------------------\n"
+#       f"{prepped_text}\n\n\n")
+
+
+# def og_file_len(self):  # TODO: Fix so it works with video as well (cv2)
+#
+#
+#     # def with_opencv(filename):
+#     #     import cv2
+#     #     video = cv2.VideoCapture(filename)
+#     #
+#     #     duration = video.get(cv2.CAP_PROP_POS_MSEC)
+#     #     frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+#     #
+#     #     return duration, frame_count
+# print(f"Thread: {thread} Thread != threading.current_thread(): {thread != threading.current_thread()} Thread.daemon: {thread.daemon} Not thread.daemon: {not thread.daemon}")
