@@ -99,7 +99,7 @@ def save_audio(file_number: int, duration: int):
             audio_file.writeframes(chunk.tobytes())
 
     print(f"Request for {duration} seconds saved under file with name {file_name}!")
-    to_process_q.put(save_dir_with_name)  # Add path to queue so it's queued to change to text
+    to_transcribe_q.put(save_dir_with_name)  # Add path to queue so it's queued to change to text
 
 
 def record_and_listen_for_input():
@@ -113,7 +113,7 @@ def record_and_listen_for_input():
     # Listen for key presses until time to exit
     counter = 0
     while not time_to_exit.is_set():
-        if keyboard.is_pressed("s"):  # TODO: For the love of god turn this into a loop
+        if keyboard.is_pressed("="):  # TODO: For the love of god turn this into a loop
             print("Saving last temp_MAXIMUM minutes...")
             time.sleep(.5)  # Ensures it saves while you're pressing the key (ending should be more accurate)
 
@@ -127,7 +127,7 @@ def record_and_listen_for_input():
             counter += 1
             time.sleep(.5)
 
-        elif keyboard.is_pressed("d"):
+        elif keyboard.is_pressed("]"):
             print("Saving last three minutes...")
             time.sleep(.5)  # Ensures it saves while you're pressing the key (ending should be more accurate)
 
@@ -141,7 +141,7 @@ def record_and_listen_for_input():
             counter += 1
             time.sleep(.5)
 
-        elif keyboard.is_pressed("f"):
+        elif keyboard.is_pressed("["):
             print("Saving last one minute...")
             time.sleep(.5)  # Ensures it saves while you're pressing the key (ending should be more accurate)
 
@@ -155,7 +155,7 @@ def record_and_listen_for_input():
             counter += 1
             time.sleep(.5)
 
-        elif keyboard.is_pressed("g"):
+        elif keyboard.is_pressed("'"):
             print("Saving last 30 seconds...")
             time.sleep(.5)  # Ensures it saves while you're pressing the key (ending should be more accurate)
 

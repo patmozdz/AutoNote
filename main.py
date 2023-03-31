@@ -2,34 +2,10 @@ import os
 import preper
 from audioreplay import record_and_listen_for_input
 import threading
-from mastervariables import time_to_exit, to_chatgpt_q, TO_PROCESS_DIR, to_process_q
+from mastervariables import time_to_exit, to_chatgpt_q, TO_PROCESS_DIR, to_transcribe_q
 import keyboard
-from tochatgpt import pass_to_chatgpt
-import queue
-
-
-def wait_to_process():  # TODO: Put this in another python file
-    # Forever loop as long as not time to exit
-    while not time_to_exit.is_set():
-        try:
-            # Default is block=True, but helps with clarity. Blocks for 1 second, then checks if time to exit before
-            # continuing to try and get the front queue item (blocking for 1 second again)
-            full_dir = to_process_q.get(block=True, timeout=1)
-            file_name = os.path.basename(full_dir)
-
-            # Make sure it is in fact a file that's there...
-            if os.path.isfile(full_dir):
-                # Start a thread to process from file to note
-                to_note_thread = threading.Thread(target=preper.preprocess_to_note_and_place_in_queue,
-                                                  args=(full_dir,),
-                                                  daemon=False,
-                                                  name="to note thread")
-                to_note_thread.start()
-            # If it's not a file (folder or whatever) raise an exception
-            else:
-                raise Exception(f"File that was in queue for processing: {file_name} not a file")
-        except queue.Empty:  # Pass only if queue.Empty, ensures other exceptions are not caught
-            pass
+from tochatgpt import to_chatgpt_q_grabber
+from totranscribegrabber import to_transcribe_q_grabber
 
 
 def main():
@@ -40,17 +16,18 @@ def main():
     background_rec_thread.start()
 
     # Start background thread that waits for items to show up in to_process, and then processes them into Notes objects
-    wait_for_files_in_folder = threading.Thread(target=wait_to_process,
+    wait_for_files_in_folder = threading.Thread(target=to_transcribe_q_grabber,
                                                 daemon=True,
                                                 name="wait to process thread")
     wait_for_files_in_folder.start()
 
     # Start background thread that constantly watches queue and passes notes to ChatGPT
-    from_queue_to_gpt_thread = threading.Thread(target=pass_to_chatgpt,
+    from_queue_to_gpt_thread = threading.Thread(target=to_chatgpt_q_grabber,
                                                 daemon=True,
                                                 name="pass to chatgpt thread")
     from_queue_to_gpt_thread.start()
 
+    # Forever checks if keybind is pressed, if so sets "time_to_exit" event
     while not time_to_exit.is_set():
         if keyboard.is_pressed("q"):
             print("SETTING time_to_exit...")

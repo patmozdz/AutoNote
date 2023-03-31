@@ -1,3 +1,5 @@
+# TODO: MERGE THIS WITH TOTRANSCRIBE GRABBER
+
 from PIL import Image, ImageOps
 import pytesseract as pytess
 import whisper
@@ -61,13 +63,13 @@ def preprocess(full_dir: str) -> str:
     file_type = determine_type(full_dir)
     if file_type in SUPPORTED_AUD:
         with run_whisper_lock:
-            text = run_whisper(full_dir)
+            output_text = run_whisper(full_dir)
     elif file_type in SUPPORTED_IMG:
-        text = run_pytess(full_dir)
+        output_text = run_pytess(full_dir)
     else:
         raise Exception(f"File: {file_name} with type {file_type} is not a supported file")
 
-    return text
+    return output_text
 
 
 def preprocess_to_note_and_place_in_queue(full_dir: str) -> str:
@@ -76,3 +78,9 @@ def preprocess_to_note_and_place_in_queue(full_dir: str) -> str:
     note = Note(prepped_text, full_dir)
 
     to_chatgpt_q.put(note)
+
+
+# Only run if tests wanted
+if __name__ == "__main__":
+    text = run_whisper("C:\\Users\\Papis\\Documents\\~GitHub Projects\\AutoNote\\to process\\(0) 2023-03-30 22.20.53.590736.wav")
+    print(text)
