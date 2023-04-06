@@ -7,19 +7,15 @@ import time
 import os
 import threading
 from datetime import datetime
-from mastervariables import *
+from mastervariables import BUFFER_MAX_DURATION, time_to_exit, TO_PROCESS_DIR, to_transcribe_q
+from default_keybindings import DEFAULT_KEYBINDS  # TODO: FIX CIRCULAR IMPORT
 
 
 # Constants
-BUFFER_MAX_DURATION = 5 * 60  # 5 minutes
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 16000
 CHUNK_SIZE = 1024
-# Constant time length
-THREE_MIN = 3 * 60
-ONE_MIN = 60
-HALF_MIN = 30
 
 
 # Sets up a deque with maxlen of 5 minutes worth of chunks (the deque consists of np arrays, each array is a chunk)
@@ -63,6 +59,8 @@ def num_chunks_to_secs(num_chunks: int) -> int:
 
 
 def save_audio(file_number: int, duration: int):
+    time.sleep(.5)  # Slight delay before actually saving so that it captures another .5 seconds
+
     # Lock so that if a new chunk is being appended to buffer, wait till it's appended.
     with buffer_lock:
         buffer_copy = tuple(buffer)
@@ -102,6 +100,20 @@ def save_audio(file_number: int, duration: int):
     to_transcribe_q.put(save_dir_with_name)  # Add path to queue so it's queued to change to text
 
 
+def start_save_thread(duration):
+    global TODAYS_FILES_COUNTER
+    print(f"Saving last {duration} seconds...")
+
+    # Start a separate thread for saving so that main loop can continue while a long file is saving
+    save_thread = threading.Thread(target=save_audio,
+                                   args=(TODAYS_FILES_COUNTER, duration),
+                                   daemon=False,
+                                   name="save thread")
+    save_thread.start()
+
+    TODAYS_FILES_COUNTER += 1
+
+
 def record_and_listen_for_input():
     # Start recording in the background
     recording_thread = threading.Thread(target=record_audio,
@@ -110,61 +122,10 @@ def record_and_listen_for_input():
     recording_thread.start()
     print("Recording... Press 's' to save the last 5 minutes of audio (d for 3, f for 1, g for .5).")
 
-    # Listen for key presses until time to exit
-    counter = 0
     while not time_to_exit.is_set():
-        if keyboard.is_pressed("="):  # TODO: For the love of god turn this into a loop
-            print("Saving last temp_MAXIMUM minutes...")
-            time.sleep(.5)  # Ensures it saves while you're pressing the key (ending should be more accurate)
-
-            # Start a separate thread for saving so that main loop can continue while a long file is saving
-            save_thread = threading.Thread(target=save_audio,
-                                           args=(counter, BUFFER_MAX_DURATION),
-                                           daemon=False,
-                                           name="save thread")
-            save_thread.start()
-
-            counter += 1
-            time.sleep(.5)
-
-        elif keyboard.is_pressed("]"):
-            print("Saving last three minutes...")
-            time.sleep(.5)  # Ensures it saves while you're pressing the key (ending should be more accurate)
-
-            # Start a separate thread for saving so that main loop can continue while a long file is saving
-            save_thread = threading.Thread(target=save_audio,
-                                           args=(counter, THREE_MIN),
-                                           daemon=False,
-                                           name="save thread")
-            save_thread.start()
-
-            counter += 1
-            time.sleep(.5)
-
-        elif keyboard.is_pressed("["):
-            print("Saving last one minute...")
-            time.sleep(.5)  # Ensures it saves while you're pressing the key (ending should be more accurate)
-
-            # Start a separate thread for saving so that main loop can continue while a long file is saving
-            save_thread = threading.Thread(target=save_audio,
-                                           args=(counter, ONE_MIN),
-                                           daemon=False,
-                                           name="save thread")
-            save_thread.start()
-
-            counter += 1
-            time.sleep(.5)
-
-        elif keyboard.is_pressed("'"):
-            print("Saving last 30 seconds...")
-            time.sleep(.5)  # Ensures it saves while you're pressing the key (ending should be more accurate)
-
-            # Start a separate thread for saving so that main loop can continue while a long file is saving
-            save_thread = threading.Thread(target=save_audio,
-                                           args=(counter, HALF_MIN),
-                                           daemon=False,
-                                           name="save thread")
-            save_thread.start()
-
-            counter += 1
-            time.sleep(.5)
+        for keybind in DEFAULT_KEYBINDS["recording"]:
+            if keyboard.is_pressed(keybind.key):
+                keybind.play_action()
+                # Waits 1 second before checking for next keybind so that you can only save at most 1 time per second
+                time.sleep(1)
+                break

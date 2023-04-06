@@ -2,7 +2,8 @@ import os
 import preper
 from audioreplay import record_and_listen_for_input
 import threading
-from mastervariables import time_to_exit, to_chatgpt_q, TO_PROCESS_DIR, to_transcribe_q
+from mastervariables import time_to_exit
+from default_keybindings import DEFAULT_KEYBINDS
 import keyboard
 from tochatgpt import to_chatgpt_q_grabber
 from totranscribegrabber import to_transcribe_q_grabber
@@ -29,9 +30,10 @@ def main():
 
     # Forever checks if keybind is pressed, if so sets "time_to_exit" event
     while not time_to_exit.is_set():
-        if keyboard.is_pressed("q"):
-            print("SETTING time_to_exit...")
-            time_to_exit.set()
+        for keybind in DEFAULT_KEYBINDS["main"]:
+            if keyboard.is_pressed(keybind.key):
+                keybind.play_action()
+                break
 
     # If q is pressed, exit loop and do the following
     print("Ending all threads (not waiting for daemon, waiting for others)...")

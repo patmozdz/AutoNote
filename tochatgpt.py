@@ -28,11 +28,13 @@ def generate_notes_query(pre_prompt, text):
 
 
 def gpt_process_this(note: Note):  # TODO: Figure out how to continue messaging (do I have to store messages list myself?)
+    query = generate_notes_query(note.pre_prompt, note.og_text)
+
     note.chatgpt_info = openai.ChatCompletion.create(
         model=GPT_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_MESSAGE},
-            {"role": "user", "content": generate_notes_query(note.pre_prompt, note.og_text)}
+            {"role": "user", "content": query}
         ]
     )
 
@@ -49,7 +51,7 @@ def gpt_process_this(note: Note):  # TODO: Figure out how to continue messaging 
 
     note.list_of_bulletpoints = [bullet.strip() for bullet in response_text.split("%")]
 
-    print(f"\n\n"
+    print(f"Query: {query}\n\n"
           f"\t\t-----------------------------------------------------\n"
           f"\t\t{note.get_og_file_len()} second file turned into notes by ChatGPT:\n"
           f"\t\t-----------------------------------------------------")
