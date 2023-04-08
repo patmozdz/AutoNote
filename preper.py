@@ -4,7 +4,7 @@ from PIL import Image, ImageOps
 import pytesseract as pytess
 import whisper
 from notes import Note
-from mastervariables import to_chatgpt_q
+from globals import to_chatgpt_q
 import os
 import threading
 

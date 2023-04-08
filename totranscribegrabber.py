@@ -1,4 +1,4 @@
-from mastervariables import time_to_exit, to_transcribe_q
+from globals import time_to_exit, to_transcribe_q
 import os
 import queue
 import preper

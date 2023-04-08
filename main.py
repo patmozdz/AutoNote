@@ -1,12 +1,10 @@
-import os
-import preper
-from audioreplay import record_and_listen_for_input
+from audio_replay import record_and_listen_for_input
 import threading
-from mastervariables import time_to_exit
-from default_keybindings import DEFAULT_KEYBINDS
+from globals import time_to_exit
 import keyboard
 from tochatgpt import to_chatgpt_q_grabber
 from totranscribegrabber import to_transcribe_q_grabber
+from globals import current_keybinds
 
 
 def main():
@@ -30,8 +28,8 @@ def main():
 
     # Forever checks if keybind is pressed, if so sets "time_to_exit" event
     while not time_to_exit.is_set():
-        for keybind in DEFAULT_KEYBINDS["main"]:
-            if keyboard.is_pressed(keybind.key):
+        for keybind in current_keybinds["main"]:
+            if keyboard.is_pressed(keybind.get_key()):
                 keybind.play_action()
                 break
 

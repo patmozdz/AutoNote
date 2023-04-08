@@ -7,8 +7,7 @@ import time
 import os
 import threading
 from datetime import datetime
-from mastervariables import BUFFER_MAX_DURATION, time_to_exit, TO_PROCESS_DIR, to_transcribe_q
-from default_keybindings import DEFAULT_KEYBINDS  # TODO: FIX CIRCULAR IMPORT
+from globals import TO_PROCESS_DIR, BUFFER_MAX_DURATION, time_to_exit, to_transcribe_q, current_keybinds
 
 
 # Constants
@@ -56,6 +55,10 @@ def num_chunks_to_secs(num_chunks: int) -> int:
     secs = num_chunks * CHUNK_SIZE // RATE
 
     return secs
+
+
+# Make sure files are named correctly by day  # TODO: Make it so that it's based on date
+todays_file_counter = 0
 
 
 def save_audio(file_number: int, duration: int):
@@ -122,9 +125,9 @@ def record_and_listen_for_input():
     recording_thread.start()
     print("Recording... Press 's' to save the last 5 minutes of audio (d for 3, f for 1, g for .5).")
 
-    while not time_to_exit.is_set():
-        for keybind in DEFAULT_KEYBINDS["recording"]:
-            if keyboard.is_pressed(keybind.key):
+    while not time_to_exit.is_set():  # TODO: Make this into a global function "watch_for_keys("recording"). Also make a global function "import_requirements["recording"] that traverses through the keybinds in recording and imports dependencies (perhaps just make it part of the same one? Or make it call globals.function?)
+        for keybind in current_keybinds["recording"]:
+            if keyboard.is_pressed(keybind.get_key()):
                 keybind.play_action()
                 # Waits 1 second before checking for next keybind so that you can only save at most 1 time per second
                 time.sleep(1)

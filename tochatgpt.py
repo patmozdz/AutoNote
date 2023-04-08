@@ -1,4 +1,4 @@
-from mastervariables import time_to_exit, to_chatgpt_q, GARBAGE_DIR, TO_PROCESS_DIR
+from globals import time_to_exit, to_chatgpt_q, GARBAGE_DIR, TO_PROCESS_DIR
 import queue
 from notes import Note
 import threading
