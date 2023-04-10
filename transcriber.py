@@ -1,12 +1,12 @@
-# TODO: MERGE THIS WITH TOTRANSCRIBE GRABBER
-
+import queue
 from PIL import Image, ImageOps
 import pytesseract as pytess
 import whisper
 from notes import Note
-from globals import to_chatgpt_q
 import os
 import threading
+from globals import time_to_exit, to_transcribe_q, to_chatgpt_q
+
 
 SUPPORTED_AUD = {".mp4", ".mp3", ".wav", ".m4a"}
 SUPPORTED_IMG = {".png", ".jpeg", ".tiff"}
@@ -57,7 +57,7 @@ def run_whisper(full_dir: str) -> str:
     return output_text
 
 
-def preprocess(full_dir: str) -> str:
+def transcribe_to_text(full_dir: str) -> str:
     file_name = os.path.basename(full_dir)
 
     file_type = determine_type(full_dir)
@@ -72,12 +72,37 @@ def preprocess(full_dir: str) -> str:
     return output_text
 
 
-def preprocess_to_note_and_place_in_queue(full_dir: str) -> str:
-    prepped_text = preprocess(full_dir)
+def to_text_and_place_on_chatgpt_q(full_dir: str) -> str:
+    prepped_text = transcribe_to_text(full_dir)
 
     note = Note(prepped_text, full_dir)
 
     to_chatgpt_q.put(note)
+
+
+# Forever watches for things put on the "to_transcribe_queue".
+def to_transcribe_q_grabber():  # TODO: Put this in another python file
+    # Forever loop as long as not time to exit
+    while not time_to_exit.is_set():
+        try:
+            # Default is block=True, but helps with clarity. Blocks for 1 second, then checks if time to exit before
+            # continuing to try and get the front queue item (blocking for 1 second again)
+            full_dir = to_transcribe_q.get(block=True, timeout=1)
+            file_name = os.path.basename(full_dir)
+
+            # Make sure it is in fact a file that's there...
+            if os.path.isfile(full_dir):
+                # Start a thread to process from file to note
+                to_note_thread = threading.Thread(target=to_text_and_place_on_chatgpt_q,
+                                                  args=(full_dir,),
+                                                  daemon=False,
+                                                  name="to note thread")
+                to_note_thread.start()
+            # If it's not a file (folder or whatever) raise an exception
+            else:
+                raise Exception(f"File that was in queue for processing: {file_name} not a file")
+        except queue.Empty:  # Pass only if queue.Empty, ensures other exceptions are not caught
+            pass
 
 
 # Only run if tests wanted

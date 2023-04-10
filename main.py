@@ -1,6 +1,6 @@
 import threading
 from tochatgpt import to_chatgpt_q_grabber
-from totranscribegrabber import to_transcribe_q_grabber
+from transcriber import to_transcribe_q_grabber
 import audio_replay
 from globals import listen_for_keybinds, make_keybinds, find_keybind
 
