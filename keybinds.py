@@ -2,12 +2,12 @@ import os
 
 
 class Keybind:
-    def __init__(self, name: str, description: str, default_key: str, action: str, action_params: tuple = ()):
+    def __init__(self, name: str, description: str, default_key: str, action, action_params: tuple = ()):
         """
         :param name: The name of the keybind (eg "save")
         :param description: The description of the keybind (eg "Saves last 3 minutes")
-        :param key: The key to activate keybind TODO: Make it so that it can have key combos as well
-        :param action: The name of the function to call when calling self.play_action()
+        :param default_key: The default key to activate keybind TODO: Make it so that it can have key combos as well
+        :param action: The function to call when calling self.play_action()
         :param action_params: Optional. Must be a tuple even if single value (eg action_params=(42,))
         :return:
         """
@@ -21,14 +21,10 @@ class Keybind:
         self.custom_key = None
 
     def play_action(self):
-        function = locals().get(self.action)
-        if function and callable(function):
-            function(*self.action_params)
-        else:
-            print(f"Function '{self.action}' not found or is not callable.")
+        self.action(*self.action_params)
 
     def __str__(self):
-        return f"{self.key}: {self.description}"
+        return f"{self.get_key()}: {self.description}"
 
     def reassign_key(self, new_key):
         self.custom_key = new_key
@@ -41,6 +37,13 @@ class Keybind:
 
     def set_to_default(self):
         self.custom_key = None
+
+    # Below makes the objects hashable (can put the objects into a set and search by name directly)
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other_name):
+        return self.name == other_name
 
 
 # TODO: Modify below so that it reads from a file to get keybinds, creates new file with default keybinds if none found

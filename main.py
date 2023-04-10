@@ -1,13 +1,27 @@
-from audio_replay import record_and_listen_for_input
 import threading
-from globals import time_to_exit
-import keyboard
 from tochatgpt import to_chatgpt_q_grabber
 from totranscribegrabber import to_transcribe_q_grabber
-from globals import current_keybinds
+import audio_replay
+from globals import listen_for_keybinds, make_keybinds, find_keybind
+
+
+def record_and_listen_for_input():
+    # Start recording in the background
+    recording_thread = threading.Thread(target=audio_replay.record_audio,
+                                        daemon=True,
+                                        name="recording thread")
+    recording_thread.start()
+    help_keybind = find_keybind("Show keybinds")
+    exit_keybind = find_keybind("Exit")
+    print(f"Recording... Press '{help_keybind.get_key()}' to show keybinds or '{exit_keybind.get_key()}' to exit.")
+
+    listen_for_keybinds("recording", 1)
 
 
 def main():
+    # Make the keybinds based on default or file
+    make_keybinds()
+
     # Start background recording thread
     background_rec_thread = threading.Thread(target=record_and_listen_for_input,
                                              daemon=True,
@@ -27,11 +41,7 @@ def main():
     from_queue_to_gpt_thread.start()
 
     # Forever checks if keybind is pressed, if so sets "time_to_exit" event
-    while not time_to_exit.is_set():
-        for keybind in current_keybinds["main"]:
-            if keyboard.is_pressed(keybind.get_key()):
-                keybind.play_action()
-                break
+    listen_for_keybinds("main", delay_after_press=1)
 
     # If q is pressed, exit loop and do the following
     print("Ending all threads (not waiting for daemon, waiting for others)...")

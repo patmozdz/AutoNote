@@ -1,13 +1,12 @@
 import pyaudio
 import numpy as np
 import wave
-import keyboard
 from collections import deque
 import time
 import os
 import threading
 from datetime import datetime
-from globals import TO_PROCESS_DIR, BUFFER_MAX_DURATION, time_to_exit, to_transcribe_q, current_keybinds
+from globals import TO_PROCESS_DIR, BUFFER_MAX_DURATION, time_to_exit, to_transcribe_q
 
 
 # Constants
@@ -104,31 +103,14 @@ def save_audio(file_number: int, duration: int):
 
 
 def start_save_thread(duration):
-    global TODAYS_FILES_COUNTER
+    global todays_file_counter
     print(f"Saving last {duration} seconds...")
 
     # Start a separate thread for saving so that main loop can continue while a long file is saving
     save_thread = threading.Thread(target=save_audio,
-                                   args=(TODAYS_FILES_COUNTER, duration),
+                                   args=(todays_file_counter, duration),
                                    daemon=False,
                                    name="save thread")
     save_thread.start()
 
-    TODAYS_FILES_COUNTER += 1
-
-
-def record_and_listen_for_input():
-    # Start recording in the background
-    recording_thread = threading.Thread(target=record_audio,
-                                        daemon=True,
-                                        name="recording thread")
-    recording_thread.start()
-    print("Recording... Press 's' to save the last 5 minutes of audio (d for 3, f for 1, g for .5).")
-
-    while not time_to_exit.is_set():  # TODO: Make this into a global function "watch_for_keys("recording"). Also make a global function "import_requirements["recording"] that traverses through the keybinds in recording and imports dependencies (perhaps just make it part of the same one? Or make it call globals.function?)
-        for keybind in current_keybinds["recording"]:
-            if keyboard.is_pressed(keybind.get_key()):
-                keybind.play_action()
-                # Waits 1 second before checking for next keybind so that you can only save at most 1 time per second
-                time.sleep(1)
-                break
+    todays_file_counter += 1
