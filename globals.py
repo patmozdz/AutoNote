@@ -7,8 +7,8 @@ from keybinds import Keybind
 
 # CONSTANTS:
 # Directories
-TO_PROCESS_DIR = os.path.join(os.getcwd(), "to process")  # TODO: Add gitignore to contents
-GARBAGE_DIR = os.path.join(os.getcwd(), "garbage")  # TODO: Add gitignore to contents
+TO_PROCESS_DIR = os.path.join(os.getcwd(), "to process")
+GARBAGE_DIR = os.path.join(os.getcwd(), "garbage")
 # Default buffer durations (fix?)
 BUFFER_MAX_DURATION = 5 * 60  # 5 minutes,
 THREE_MIN = 3 * 60

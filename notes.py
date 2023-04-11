@@ -9,15 +9,8 @@ class Note:
         self.og_text = og_text
         self.og_file__dir = og_file__dir
 
-        # Set up pre-prompt:
-        pre_prompt = None
-        if input("Would you like to add any guidelines for this note? (Y/N) ") == "Y":
-            pre_prompt = input("Enter the guidelines: ")
-        self.pre_prompt = pre_prompt
-
         # Not based on parameters
         self.datetime_stamp = datetime.now()
-        self.chatgpt_info = None
         self.topic = None
         self.gpt_notes = None
         # Not based on parameters, based on file
