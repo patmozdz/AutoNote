@@ -6,11 +6,9 @@ import openai  # To set API key, type in cmd/powershell: setx VARIABLE_NAME VARI
 
 GPT_MODEL = "gpt-3.5-turbo"
 # TODO: Make it so that GPT can add subset notes with %%? Under 10 word summary?
-SYSTEM_MESSAGE = "You are tasked with creating notes based on text. Given an optional pre-prompt provided by the " \
-                 "user, generate a concise list of notes summarizing the key points from the user-provided text. " \
-                 "Use '%' instead of bullets for each note. Ensure you only include accurate information from the " \
-                 "text, and do not add or make up any information. If it's appropriate to include outside " \
-                 "information, precede it with '(generated information not in text):'."
+with file.open("system message.txt") as txt_file:
+  SYSTEM_MESSAGE = txt_file.read()
+                  
 QUERY_STRUCTURE = """
 Pre-prompt: {}
 User-provided text: {}""".strip()
