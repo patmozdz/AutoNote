@@ -1,5 +1,5 @@
 import pytest
-from transcriber import determine_type, run_whisper, run_pytess
+from transcriber import determine_type
 
 
 def test_determine_type():

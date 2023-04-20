@@ -107,5 +107,5 @@ def to_transcribe_q_grabber():  # TODO: Put this in another python file
 
 # Only run if tests wanted
 if __name__ == "__main__":
-    text = run_whisper("C:\\Users\\Papis\\Documents\\~GitHub Projects\\AutoNote\\to process\\(0) 2023-03-30 22.20.53.590736.wav")
+    text = run_whisper("/src/to process\\(0) 2023-03-30 22.20.53.590736.wav")
     print(text)

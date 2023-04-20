@@ -13,6 +13,9 @@ class Note:
         self.datetime_stamp = datetime.now()
         self.topic = None
         self.gpt_notes = None
+        self.chat_instance = None
+        self.list_of_bullets = None
+        
         # Not based on parameters, based on file
         if og_file__dir is not None:
             self.og_file_name = os.path.basename(og_file__dir)

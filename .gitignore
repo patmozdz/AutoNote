@@ -1,8 +1,7 @@
-tester
 old
-files
 venv
 .idea
 __pycache__
-garbage/*
-to process/*
+.vscode
+src/garbage/*
+src/to process/*

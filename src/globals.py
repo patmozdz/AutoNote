@@ -73,7 +73,7 @@ def make_keybinds():  # TODO: Change so it reads/writes to a file
 
     kb_show_kbinds = Keybind(name="Show keybinds",
                              description="Shows all keybinds",
-                             default_key="h",
+                             default_key="/",
                              action=show_keybinds)
 
     kb_save_slot_1 = Keybind(name="Save slot 1",

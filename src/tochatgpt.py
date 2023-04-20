@@ -1,8 +1,8 @@
-from globals import time_to_exit, to_chatgpt_q, GARBAGE_DIR, TO_PROCESS_DIR
+from globals import time_to_exit, to_chatgpt_q
 import queue
 from notes import Note
 import threading
-import openai  # To set API key, type in cmd/powershell: setx VARIABLE_NAME VARIABLE_VALUE /M
+from chat_instance import ChatInstance
 
 GPT_MODEL = "gpt-3.5-turbo"
 # TODO: Make it so that GPT can add subset notes with %%? Under 10 word summary?
@@ -19,49 +19,9 @@ User-provided text: {}""".strip()
 # Above makes it more readable because pre-prompt and user-provided text are on diff lines, but must remove whitespace
 
 
-def generate_notes_query(pre_prompt, text):
-    if pre_prompt is None:
-        pre_prompt = "None"
-
-    formatted_query = QUERY_STRUCTURE.format(pre_prompt, text)
-    return formatted_query
-
-
-def gpt_process_this(note: Note):  # TODO: Figure out how to continue messaging (do I have to store messages list myself?)
-    query = generate_notes_query(note.pre_prompt, note.og_text)
-
-    note.chatgpt_info = openai.ChatCompletion.create(
-        model=GPT_MODEL,
-        messages=[
-            {"role": "system", "content": SYSTEM_MESSAGE},
-            {"role": "user", "content": query}
-        ]
-    )
-
-    # Remove the first % so that the bullet list is split properly
-    response_text = note.chatgpt_info["choices"][0]["message"]["content"]
-    if response_text.startswith("%"):
-        response_text = response_text[1:]
-    else:
-        # Error because didn't start with % like it should?
-        pass
-
-    if response_text.endswith("%"):
-        response_text = response_text[:-1]
-
-    note.list_of_bulletpoints = [bullet.strip() for bullet in response_text.split("%")]
-
-    print(f"Query: {query}\n\n"
-          f"\t\t-----------------------------------------------------\n"
-          f"\t\t{note.get_og_file_len()} second file turned into notes by ChatGPT:\n"
-          f"\t\t-----------------------------------------------------")
-
-    for bulletpoint in note.list_of_bulletpoints:
-        print(f"-{bulletpoint}")
-
-    print(f"\nNote creation: {note.get_datetime_stamp()}")
-
-    note.move_og_file_to(GARBAGE_DIR)
+def create_and_run_chat_instance(note):
+    note.chat_instance = ChatInstance(note)
+    note.chat_instance.make_initial_query()  # TODO: Fix this so better
 
 
 def to_chatgpt_q_grabber():
@@ -73,7 +33,7 @@ def to_chatgpt_q_grabber():
 
             # New thread that's not daemon (so main waits for it to finish) that sets note object
             # self.gpt_notes attribute and self.topic attribute.
-            gpt_processing_thread = threading.Thread(target=gpt_process_this,
+            gpt_processing_thread = threading.Thread(target=create_and_run_chat_instance,
                                                      daemon=False,
                                                      args=(note,),
                                                      name="gpt processing thread")

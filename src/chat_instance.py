@@ -4,7 +4,8 @@ from globals import GARBAGE_DIR
 
 
 class ChatInstance:
-    def __init__(self):
+    def __init__(self, parent_note: Note):
+        self.parent_note = parent_note
         self.chatgpt_info = None
         self.pre_prompt = "None"  # String so that it can be passed to ChatGPT without modification
         self.GPT_MODEL = "gpt-3.5-turbo"
@@ -24,12 +25,38 @@ class ChatInstance:
 
         self.messages = []
 
-    def make_initial_query(self, note: Note):
+    def print_bullets(self):
+        assert self.parent_note.list_of_bullets is not None
+
+        print(f"Query: {self.messages[-2]['content']}\n\n"  # [-2] should be the last "role": "user" entry
+              f"\t\t-----------------------------------------------------\n"
+              f"\t\t{self.parent_note.get_og_file_len()} second file turned into notes by ChatGPT:\n"
+              f"\t\t-----------------------------------------------------")
+
+        for bulletpoint in self.parent_note.list_of_bullets:
+            print(f"-{bulletpoint}")
+
+        print(f"\nNote creation: {self.parent_note.get_datetime_stamp()}")
+
+    def set_bullets_based_off_response(self, response_text):
+        # Remove the first % so that split works properly
+        if response_text.startswith("%"):
+            response_text = response_text[1:]
+        else:
+            # TODO: Error because didn't start with % like it should?
+            pass
+
+        if response_text.endswith("%"):
+            response_text = response_text[:-1]
+
+        self.parent_note.list_of_bullets = [bullet.strip() for bullet in response_text.split("%")]
+
+    def make_initial_query(self):
         # Change pre_prompt if the user wishes
         if input("Would you like to add any guidelines for this note? (Y/N) ") == "Y":
             self.pre_prompt = input("Enter the guidelines: ")
 
-        formatted_query = self.QUERY_STRUCTURE.format(self.pre_prompt, note.og_text)
+        formatted_query = self.QUERY_STRUCTURE.format(self.pre_prompt, self.parent_note.og_text)
 
         assert len(self.messages) == 0
 
@@ -43,39 +70,29 @@ class ChatInstance:
             messages=self.messages
         )
 
-        # Remove the first % so that the bullet list is split properly
         response_text = self.chatgpt_info["choices"][0]["message"]["content"]
-
         self.messages.append({"role": "assistant", "content": response_text})
+        self.set_bullets_based_off_response(response_text)
+        self.print_bullets()
 
-        if response_text.startswith("%"):
-            response_text = response_text[1:]
-        else:
-            # TODO: Error because didn't start with % like it should?
-            pass
+        self.parent_note.move_og_file_to(GARBAGE_DIR)
 
-        if response_text.endswith("%"):
-            response_text = response_text[:-1]
-
-        note.list_of_bulletpoints = [bullet.strip() for bullet in response_text.split("%")]
-
-        print(f"Query: {formatted_query}\n\n"
-              f"\t\t-----------------------------------------------------\n"
-              f"\t\t{note.get_og_file_len()} second file turned into notes by ChatGPT:\n"
-              f"\t\t-----------------------------------------------------")
-
-        for bulletpoint in note.list_of_bulletpoints:
-            print(f"-{bulletpoint}")
-
-        print(f"\nNote creation: {note.get_datetime_stamp()}")
-
-        note.move_og_file_to(GARBAGE_DIR)
+        if input("Would you like to follow up? (Y/N)") == "Y":
+            self.follow_up_query()
 
     def follow_up_query(self):
         follow_up_text = input("Enter follow up text: ")
 
         self.messages.append({"role": "user", "content": follow_up_text})
-        self.chatgpt_info = openai.ChatCompletion.create(  # TODO: Make it so that it saves each chat's info? chatgpt_info.append()?
+        self.chatgpt_info = openai.ChatCompletion.create(
+            # TODO: Make it so that it saves each chat's info? chatgpt_info.append()?
             model=self.GPT_MODEL,
             messages=self.messages
         )
+
+        response_text = self.chatgpt_info["choices"][0]["message"]["content"]
+        self.set_bullets_based_off_response(response_text)
+        self.print_bullets()
+
+        if input("Would you like to follow up? (Y/N)") == "Y":
+            self.follow_up_query()
