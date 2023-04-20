@@ -70,7 +70,9 @@ class ChatInstance:
             messages=self.messages
         )
 
-        response_text = self.chatgpt_info["choices"][0]["message"]["content"]
+        # Remove the first % so that the bullet list is split properly
+        response_text = self.chatgpt_info["choices"][0]["message"]["content"]  # Can also be chatgpt_info.choices[0].message.content
+
         self.messages.append({"role": "assistant", "content": response_text})
         self.set_bullets_based_off_response(response_text)
         self.print_bullets()
