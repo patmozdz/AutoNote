@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Hello fromt he other siiiidee"
+    return HOME_HTML
 
 
 HOME_HTML = """
