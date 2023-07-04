@@ -1,0 +1,3 @@
+Summarize the given text into bullet-point notes, guided by any pre-prompt. Capture each key point in a note, separated by '%'. For example: "first note%second note%third note".
+
+If pre-prompt suggests adding extra information, create it even if it's not in the original text. Prefix such information with '%(Generated information not in text):' and treat it as a regular note in the series.

@@ -8,15 +8,11 @@ class ChatInstance:
         self.parent_note = parent_note
         self.chatgpt_info = None
         self.pre_prompt = "None"  # String so that it can be passed to ChatGPT without modification
-        self.GPT_MODEL = "gpt-3.5-turbo"
+        self.GPT_MODEL = "gpt-4"
 
         # TODO: Make it so that GPT can add subset notes with %%? Under 10 word summary?
-        self.SYSTEM_MESSAGE = "You are tasked with creating notes based on text. Given an optional pre-prompt provided " \
-                              "by the user, generate a concise list of notes summarizing the key points from the " \
-                              "user-provided text. Use '%' instead of bullets for each note. Ensure you only include " \
-                              "accurate information from the text, and do not add or make up any information. " \
-                              "If it's appropriate to include outside information, precede it with " \
-                              "'(generated information not in text):'."
+        with open("system message.txt") as txt_file:
+            self.SYSTEM_MESSAGE = txt_file.read()
 
         # Below makes it more readable because pre-prompt and user-provided text are on diff lines, but must remove whitespace
         self.QUERY_STRUCTURE = """

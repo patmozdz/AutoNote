@@ -3,16 +3,17 @@ import queue
 from notes import Note
 import threading
 from chat_instance import ChatInstance
+import os
 
-GPT_MODEL = "gpt-3.5-turbo"
+
+# DEPRECATED, REFER TO chat_instance.py TO MAKE CHANGES TO THE CHAT.
+GPT_MODEL = "gpt-4"
 # TODO: Make it so that GPT can add subset notes with %%? Under 10 word summary?
-with file.open("system message.txt") as txt_file:
-  SYSTEM_MESSAGE = txt_file.read()
+with open("system message.txt") as txt_file:
+    SYSTEM_MESSAGE = txt_file.read()
                   
-QUERY_STRUCTURE = """
-Pre-prompt: {}
-User-provided text: {}""".strip()
-
+QUERY_STRUCTURE = """User-provided text: {}
+Pre-prompt: {}"""
 
 # Above makes it more readable because pre-prompt and user-provided text are on diff lines, but must remove whitespace
 
