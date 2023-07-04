@@ -3,11 +3,13 @@ import queue
 from notes import Note
 import threading
 from chat_instance import ChatInstance
+import os
 
 GPT_MODEL = "gpt-3.5-turbo"
 # TODO: Make it so that GPT can add subset notes with %%? Under 10 word summary?
-with file.open("system message.txt") as txt_file:
-  SYSTEM_MESSAGE = txt_file.read()
+print(os.getcwd())
+with open("system message.txt") as txt_file:
+    SYSTEM_MESSAGE = txt_file.read()
                   
 QUERY_STRUCTURE = """
 Pre-prompt: {}
